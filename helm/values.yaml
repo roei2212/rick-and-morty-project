@@ -1,0 +1,19 @@
+replicaCount: 2
+
+image:
+  repository: rickmorty-api
+  tag: "latest"
+  pullPolicy: Never
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: nginx
+  host: rick.local
+  path: /
+  pathType: Prefix
+
+resources: {}

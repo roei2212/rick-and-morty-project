@@ -1,0 +1,41 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create kind cluster
+      uses: helm/kind-action@v1.5.0
+
+    - name: Build Docker image
+      run: |
+        docker build -t rickmorty-api:latest .
+
+    - name: Load image into kind
+      run: |
+        kind load docker-image rickmorty-api:latest
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install rickmorty ./helm -f ./helm/values.yaml
+
+    - name: Wait for pods
+      run: |
+        kubectl rollout status deployment/rickmorty-service --timeout=60s
+
+    - name: Test endpoint
+      run: |
+        kubectl port-forward deployment/rickmorty-service 8000:8000 &
+        sleep 5
+        curl -f http://localhost:8000
