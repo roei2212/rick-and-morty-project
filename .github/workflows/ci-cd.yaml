@@ -14,6 +14,9 @@ jobs:
 
     - name: Create kind cluster
       uses: helm/kind-action@v1.5.0
+      with:
+        cluster_name: kind
+        wait: 120s
 
     - name: Build Docker image
       run: |
@@ -21,7 +24,7 @@ jobs:
 
     - name: Load image into kind
       run: |
-        kind load docker-image rickmorty-api:latest
+        kind load docker-image rickmorty-api:latest --name kind
 
     - name: Install Helm
       uses: azure/setup-helm@v3
